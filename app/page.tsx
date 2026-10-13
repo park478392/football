@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import savedPlayerPhotos from '../public/players/manifest.json'
+
+const playerPhotos: Record<string, { image: string }> = savedPlayerPhotos
 
 type League = {
   code: string
@@ -70,11 +73,6 @@ type ApiData = {
   scorers?: Scorer[]
 }
 
-type PlayerImages = {
-  scorer: string | null
-  assist: string | null
-}
-
 const leagues: League[] = [
   {
     code: 'PL',
@@ -116,18 +114,6 @@ export default function Home() {
   const [leagueIndex, setLeagueIndex] = useState(0)
 
   const [leagueData, setLeagueData] = useState<Record<string, ApiData>>({})
-
-  /*
-    리그별 선수 사진 저장
-
-    예:
-    playerImages.PL
-    playerImages.PD
-  */
-
-  const [playerImages, setPlayerImages] = useState<
-    Record<string, PlayerImages>
-  >({})
 
   const [initialLoading, setInitialLoading] = useState(true)
 
@@ -247,88 +233,10 @@ export default function Home() {
       ? [...data.scorers].sort((a, b) => (b.assists ?? 0) - (a.assists ?? 0))[0]
       : null
 
-  /*
-    =========================
-    선수 사진 가져오기
-    =========================
-  */
-
-  useEffect(() => {
-    if (!topScorer || !topAssist) {
-      return
-    }
-
-    /*
-      이미 이 리그 사진을
-      받아왔다면 다시 요청 X
-    */
-
-    if (playerImages[currentLeague.code]) {
-      return
-    }
-
-    async function loadPlayerImages() {
-      try {
-        const scorerUrl = `/api/player-image?name=${encodeURIComponent(
-          topScorer!.player.name,
-        )}&team=${encodeURIComponent(topScorer!.team.name)}`
-
-        const assistUrl = `/api/player-image?name=${encodeURIComponent(
-          topAssist!.player.name,
-        )}&team=${encodeURIComponent(topAssist!.team.name)}`
-
-        const [scorerResponse, assistResponse] = await Promise.all([
-          fetch(scorerUrl),
-
-          fetch(assistUrl),
-        ])
-
-        const scorerResult = await scorerResponse.json()
-
-        const assistResult = await assistResponse.json()
-
-        setPlayerImages((current) => ({
-          ...current,
-
-          [currentLeague.code]: {
-            scorer: scorerResult.image || null,
-
-            assist: assistResult.image || null,
-          },
-        }))
-      } catch (error) {
-        console.error('선수 사진 로딩 오류:', error)
-
-        /*
-          실패해도 저장해서
-          계속 요청하지 않음
-        */
-
-        setPlayerImages((current) => ({
-          ...current,
-
-          [currentLeague.code]: {
-            scorer: null,
-
-            assist: null,
-          },
-        }))
-      }
-    }
-
-    loadPlayerImages()
-  }, [
-    topScorer?.player.id,
-    topAssist?.player.id,
-    currentLeague.code,
-    playerImages,
-  ])
-
-  /*
-    현재 리그 선수 사진
-  */
-
-  const currentImages = playerImages[currentLeague.code]
+  const currentImages = {
+    scorer: topScorer ? playerPhotos[topScorer.player.id]?.image : undefined,
+    assist: topAssist ? playerPhotos[topAssist.player.id]?.image : undefined,
+  }
 
   /*
     =========================
