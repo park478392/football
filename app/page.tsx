@@ -285,7 +285,7 @@ export default function Home() {
               경기
             </a>
 
-            <a href="#">순위</a>
+            <a href="/standings">순위</a>
 
             <a href="#">선수</a>
 
@@ -318,7 +318,7 @@ export default function Home() {
 
           <a href="/matches">경기</a>
 
-          <a href="#">순위</a>
+          <a href="/standings">순위</a>
 
           <a href="#">선수</a>
 
