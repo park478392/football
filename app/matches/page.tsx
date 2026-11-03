@@ -1,5 +1,7 @@
 'use client'
 
+import SiteHeader from '../SiteHeader'
+
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 type Team = {
@@ -1342,25 +1344,7 @@ export default function MatchesPage() {
             HEADER
         ========================= */}
 
-        <header className="header">
-          <div className="logo">FOOTBALL DATA</div>
-
-          <nav>
-            <a href="/">홈</a>
-
-            <a className="active" href="/matches">
-              경기
-            </a>
-
-            <a href="/standings">순위</a>
-
-            <a href="#">선수</a>
-
-            <a href="#">본전 뽑았나?</a>
-
-            <a href="#">라부 예측</a>
-          </nav>
-        </header>
+        <SiteHeader active="/matches" />
 
         {/* =========================
             HERO

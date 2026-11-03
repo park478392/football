@@ -1,6 +1,7 @@
 'use client'
 
-import Link from 'next/link'
+import SiteHeader from '../SiteHeader'
+
 import { useEffect, useState } from 'react'
 import styles from './standings.module.css'
 import TeamRace from './TeamRace'
@@ -60,14 +61,7 @@ export default function StandingsPage() {
 
   return (
     <div className="site">
-      <header className="header">
-        <Link className="logo" href="/">FOOTBALL DATA</Link>
-        <nav aria-label="주 메뉴">
-          <Link href="/">홈</Link><Link href="/matches">경기</Link>
-          <Link className="active" href="/standings" aria-current="page">순위</Link>
-          <a href="#">선수</a><a href="#">본전 뽑았나?</a><a href="#">라부 예측</a>
-        </nav>
-      </header>
+      <SiteHeader active="/standings" />
       <main className={styles.main}>
         <div className={styles.hero}>
           <span className="section-label">THE CHASE · 내 팀의 경쟁 상황</span>
@@ -106,7 +100,7 @@ export default function StandingsPage() {
             </div>}
           <p className={styles.note}>승리 3점 · 무승부 1점 · 패배 0점. 동률 및 승점 징계는 리그 공식 순위를 따릅니다.</p>
         </section>
-        {!loading && !error && table.length > 0 && <div className={styles.analysis}><TeamRace key={league} league={league} table={table} homeTable={data?.standings.find((item) => item.type === 'HOME')?.table ?? []} awayTable={data?.standings.find((item) => item.type === 'AWAY')?.table ?? []} /></div>}
+        {!loading && !error && table.length > 0 && <div className={styles.analysis}><TeamRace key={league} league={league} table={table} /></div>}
         <p className={styles.source}>데이터 제공: football-data.org</p>
       </main>
     </div>

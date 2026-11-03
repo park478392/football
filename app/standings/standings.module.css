@@ -1,4 +1,15 @@
 .main { max-width: 1400px; margin: 0 auto; padding: 46px 30px 70px; }
+.attendance { display: flex; align-items: center; gap: 22px; background: linear-gradient(110deg,#edf4ff,#ffffff); border: 1px solid #dce7fa; border-radius: 16px; padding: 24px; margin-top: 26px; }
+.attendanceIcon { display: grid; place-items: center; width: 56px; height: 56px; flex-shrink: 0; border-radius: 16px; background: #2563eb; color: white; font-size: 27px; box-shadow: 0 6px 14px #2563eb22; }
+.attendanceText { flex: 1; }
+.attendanceText h2 { font-size: 20px; color: #243349; letter-spacing: -.5px; }
+.attendanceText b { color: #2563eb; }
+.attendanceText p { font-size: 11px; color: #72829b; line-height: 1.8; margin-top: 6px; }
+.attendanceAction { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.attendanceAction strong { color: #2563eb; font-size: 17px; }
+.attendanceAction button { border: 0; border-radius: 9px; padding: 12px 20px; color: white; background: #2563eb; font-size: 12px; font-weight: 700; cursor: pointer; }
+.attendanceAction button:disabled { background: #e3ebf7; color: #72829b; cursor: default; }
+@media(max-width:650px) { .attendance { flex-wrap: wrap; gap: 14px; padding: 18px; } .attendanceIcon { width: 42px; height: 42px; font-size: 21px; } .attendanceText h2 { font-size: 17px; } .attendanceAction { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; } }
 .hero h1 { font-size: 38px; font-weight: 850; letter-spacing: -1.5px; margin: 9px 0 12px; }
 .hero p { color: #718198; font-size: 14px; line-height: 1.7; }
 .tabs { display: flex; gap: 8px; overflow-x: auto; margin: 30px 0 20px; padding: 2px 0 8px; }
@@ -22,6 +33,83 @@
 .race { margin: 6px 0 28px; }
 .analysis { margin-top: 32px; }
 .myPrediction { margin: 0 0 22px; padding: 20px; background: #f6f9ff; border: 1px solid #e0e9f8; border-radius: 12px; }
+.myPrediction[data-theme="mint"] { background: #eefbf7; border-color: #b9e7da; }
+.myPrediction[data-theme="sunset"] { background: #fff6ed; border-color: #f3d4b8; }
+.myPrediction[data-theme="midnight"] { background: #eaf0f9; border-color: #abbdd9; }
+.myPrediction[data-theme="lavender"] { background: #f6f0ff; border-color: #d9c3f2; }
+.walletStats[data-frame] { padding: 9px; border-radius: 17px; gap: 9px; }
+.walletStats[data-frame="silver"] { border: 3px solid #9aaabd; background: linear-gradient(120deg,#7d8fa6,#edf3fa 32%,#acbbcd 60%,#e2eaf3); box-shadow: 0 0 0 2px #e2eaf4,0 6px 18px #526b8e24; }
+.walletStats[data-frame="silver"] > div { border: 1px solid #b3c2d4; background: linear-gradient(145deg,#fff,#e9eff7); }
+.walletStats[data-frame="gold"] { border: 3px solid #c18b18; background: linear-gradient(120deg,#b77b0b,#ffe8a0 28%,#d4a528 60%,#fff0bf); box-shadow: 0 0 0 2px #fff0bb,0 0 22px #d4a52845; }
+.walletStats[data-frame="gold"] > div { border: 1px solid #e2bf62; background: linear-gradient(145deg,#fffdf7,#fff2d1); }
+.walletStats[data-frame="gold"] strong { color: #95640b; }
+.walletStats[data-frame="champion"] { border: 3px solid #38a8e8; background: linear-gradient(120deg,#298acb,#e1f8ff 30%,#68caff 65%,#effcff); box-shadow: 0 0 0 2px #d7f3ff,0 0 28px #38a8e84a; }
+.walletStats[data-frame="champion"] > div { border: 1px solid #9bdcff; background: linear-gradient(145deg,#fff,#e5f5ff); }
+.walletStats[data-frame="champion"] strong { color: #137ab7; }
+.walletStats[data-frame="emerald"] { border: 3px solid #0d9488; background: linear-gradient(120deg,#0f766e,#d6f5ef 30%,#5cbfb5 65%,#eafffa); box-shadow: 0 0 0 2px #d0f0eb,0 0 24px #0d948840; }
+.walletStats[data-frame="emerald"] > div { border: 1px solid #91d4cc; background: linear-gradient(145deg,#fff,#e6f7f4); }
+.walletStats[data-frame="emerald"] strong { color: #0f766e; }
+.titleBadge { display: block; font-size: 11px; margin-top: 10px; font-weight: 700; }
+.shop { padding: 24px; margin: 28px 0; border: 1px solid #e1e8f0; border-radius: 16px; background: #fafbfd; }
+.shopHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.shopHeader h3 { font-size: 21px; color: #243349; letter-spacing: -.6px; }
+.shopHeader p { color: #8190a5; font-size: 12px; margin-top: 9px; }
+.shopHeader > strong { flex-shrink: 0; color: #2563eb; background: #edf3ff; padding: 12px 16px; border-radius: 10px; font-size: 19px; }
+.shopTabs { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin: 24px 0 18px; }
+.shopTabs button { border: 1px solid #e0e7f0; border-radius: 8px; padding: 9px 13px; background: white; color: #64748b; font-size: 11px; cursor: pointer; }
+.shopTabs button[aria-pressed="true"] { background: #2563eb; color: white; border-color: #2563eb; }
+.shopTabs > span { margin-left: auto; color: #8190a5; font-size: 11px; }
+.shopGrid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.shopItem { padding: 17px; min-width: 0; border: 1px solid #e3e9f2; border-radius: 12px; background: white; }
+.itemPreview { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; min-height: 100px; border: 2px solid transparent; border-radius: 8px; margin-bottom: 16px; }
+.itemPreview > span { font-size: 30px; }
+.itemPreview small { font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.shopItem h4 { font-size: 14px; color: #243349; }
+.shopItem > p { font-size: 11px; color: #8190a5; line-height: 1.8; margin: 8px 0 18px; }
+.itemBottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.itemBottom strong { font-size: 12px; color: #516a8f; }
+.itemBottom button, .purchaseConfirm button { border: 1px solid #dbe6f8; border-radius: 7px; padding: 8px 10px; background: #edf4ff; color: #2563eb; font-size: 10px; cursor: pointer; }
+.itemBottom button[aria-pressed="true"] { background: #2563eb; color: white; }
+.shop button:disabled { opacity: .4; cursor: default; }
+.purchaseConfirm { margin-top: 14px; padding-top: 12px; border-top: 1px solid #e3e9f2; }
+.purchaseConfirm p { font-size: 11px; color: #64748b; line-height: 1.8; margin-bottom: 10px; }
+.purchaseConfirm button { margin-right: 7px; }
+.shop button:focus-visible { outline: 3px solid #93b8f6; outline-offset: 2px; }
+.shop > .gameMessage { margin-top: 18px; }
+@media(max-width:800px) { .shopGrid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:500px) { .shop { padding: 18px 12px; } .shopHeader { align-items: flex-start; flex-direction: column; } .shopHeader h3 { font-size: 18px; } .shopGrid { gap: 8px; } .shopItem { padding: 12px; } .itemBottom { align-items: flex-start; flex-direction: column; } .shopTabs > span { width: 100%; margin: 5px 0 0; } }
+.optionOdds { display: block; font-size: 11px; font-weight: 500; margin-top: 7px; opacity: .85; }
+.rewardPreview { margin-top: 16px; padding: 16px; border: 1px solid #dbe8ff; border-radius: 9px; background: #edf4ff; }
+.rewardPreview > span { display: block; font-size: 12px; color: #516a8d; }
+.rewardPreview strong { font-size: 23px; color: #2563eb; margin-left: 8px; }
+.rewardPreview > small { display: block; margin-top: 8px; font-size: 11px; color: #72829b; }
+.walletStats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin: 18px 0; }
+.walletStats > div { padding: 16px; border: 1px solid #e0e9f8; border-radius: 10px; background: white; }
+.walletStats span { display: block; font-size: 11px; color: #72829b; margin-bottom: 9px; }
+.walletStats strong { font-size: 21px; color: #2563eb; }
+.gameRule { font-size: 11px; line-height: 1.8; color: #72829b; margin: 14px 0 20px; }
+.stakeRow { display: flex; align-items: flex-end; gap: 12px; margin-top: 16px; }
+.stakeRow label { color: #64748b; font-size: 11px; }
+.stakeRow input { display: block; width: 150px; padding: 11px; margin-top: 7px; border: 1px solid #d9e3f0; border-radius: 8px; background: white; color: #243d64; }
+.stakeRow button { padding: 12px 20px; background: #2563eb; border: 0; border-radius: 8px; color: white; font-size: 12px; cursor: pointer; }
+.myPrediction button:disabled { opacity: .5; cursor: default; }
+.pickButtons button.resultOutcome:disabled { opacity: 1; }
+.pickButtons button.pickSuccess { background: #ecfdf5; color: #047857; border: 2px solid #10b981; }
+.pickButtons button.pickFailure { background: #fee2e2; color: #b91c1c; border: 2px solid #ef4444; }
+.resultHistory { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.resultHistory > li { padding: 16px; background: #ffffffb8; border: 1px solid #e0e9f8; border-radius: 10px; }
+.historyHeading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.historyHeading strong { color: #334155; font-size: 12px; }
+.historyHeading p { font-size: 10px; color: #72829b; margin-top: 7px; line-height: 1.7; }
+.historyHeading b { font-size: 11px; color: #2563eb; flex-shrink: 0; }
+.gameMessage { color: #2563eb; font-size: 12px; line-height: 1.8; margin-bottom: 20px; }
+.resultButton { padding: 7px 11px; background: white; color: #2563eb; border: 1px solid #d9e3f0; border-radius: 7px; cursor: pointer; font-size: 11px; }
+.pickHistory { list-style: none; padding: 0; margin: 0; }
+.pickHistory li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid #e0e9f8; }
+.pickHistory strong { font-size: 12px; color: #334155; }
+.pickHistory span { display: block; font-size: 11px; color: #72829b; margin-top: 5px; }
+.pickHistory b { flex-shrink: 0; color: #2563eb; font-size: 11px; }
+@media(max-width:550px) { .walletStats { gap: 6px; } .walletStats > div { padding: 12px 9px; } .walletStats strong { font-size: 15px; } .walletStats span { font-size: 10px; } .stakeRow input { width: 120px; } }
 .pickHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .pickHeading h4 { color: #243d64; font-size: 14px; }
 .pickHeading > span { color: #72829b; font-size: 11px; }

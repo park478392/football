@@ -1,6 +1,9 @@
 'use client'
 
+import SiteHeader from './SiteHeader'
+
 import { useEffect, useState } from 'react'
+import FootballNews from './FootballNews'
 import savedPlayerPhotos from '../public/players/manifest.json'
 
 const playerPhotos: Record<string, { image: string }> = savedPlayerPhotos
@@ -275,30 +278,13 @@ export default function Home() {
   if (initialLoading) {
     return (
       <main className="site">
-        <header className="header">
-          <div className="logo">FOOTBALL DATA</div>
-
-          <nav>
-            <a href="/">홈</a>
-
-            <a className="active" href="/matches">
-              경기
-            </a>
-
-            <a href="/standings">순위</a>
-
-            <a href="#">선수</a>
-
-            <a href="#">본전 뽑았나?</a>
-
-            <a href="#">라부 예측</a>
-          </nav>
-        </header>
+        <SiteHeader active="/" />
 
         <div className="content">
           <section className="loading-box">
             <strong>{error}</strong>
           </section>
+          <FootballNews />
         </div>
       </main>
     )
@@ -308,25 +294,7 @@ export default function Home() {
     <main className="site">
       {/* HEADER */}
 
-      <header className="header">
-        <div className="logo">FOOTBALL DATA</div>
-
-        <nav>
-          <a className="active" href="/">
-            홈
-          </a>
-
-          <a href="/matches">경기</a>
-
-          <a href="/standings">순위</a>
-
-          <a href="#">선수</a>
-
-          <a href="#">본전 뽑았나?</a>
-
-          <a href="#">라부 예측</a>
-        </nav>
-      </header>
+      <SiteHeader active="/" />
 
       <div className="content">
         {/* =========================
@@ -499,83 +467,9 @@ export default function Home() {
               </div>
             </section>
 
-            {/* =========================
-                순위표
-            ========================= */}
-
-            <section className="ranking-box">
-              <div className="box-header">
-                <div>
-                  <span className="section-label">STANDINGS</span>
-
-                  <h2>리그 순위</h2>
-                </div>
-
-                <div className="ranking-meta">
-                  <span>{currentLeague.name}</span>
-
-                  <strong>{seasonText}</strong>
-                </div>
-              </div>
-
-              <div className="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>순위</th>
-
-                      <th className="team-column">클럽</th>
-
-                      <th>경기</th>
-
-                      <th>승</th>
-
-                      <th>무</th>
-
-                      <th>패</th>
-
-                      <th>득실</th>
-
-                      <th>승점</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {standings.map((team) => (
-                      <tr key={team.team.id}>
-                        <td className="rank">{team.position}</td>
-
-                        <td className="team">
-                          <img src={team.team.crest} alt={team.team.name} />
-
-                          <strong>
-                            {team.team.shortName || team.team.name}
-                          </strong>
-                        </td>
-
-                        <td>{team.playedGames}</td>
-
-                        <td>{team.won}</td>
-
-                        <td>{team.draw}</td>
-
-                        <td>{team.lost}</td>
-
-                        <td>
-                          {team.goalDifference > 0
-                            ? `+${team.goalDifference}`
-                            : team.goalDifference}
-                        </td>
-
-                        <td className="points">{team.points}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
           </>
         )}
+        <FootballNews />
       </div>
     </main>
   )
