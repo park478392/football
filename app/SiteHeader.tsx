@@ -46,11 +46,11 @@ export default function SiteHeader({ active }: { active: string }) {
     } catch (err) { setNotice(err instanceof Error ? err.message : '연결을 확인해 주세요.') }
     finally { setBusy(false) }
   }
-  const links = [{ href: '/', label: '홈' }, { href: '/matches', label: '경기' }, { href: '/standings', label: '순위' }, { href: '/predictions', label: '승부 예측' }]
+  const links = [{ href: '/', label: '홈' }, { href: '/matches', label: '경기' }, { href: '/standings', label: '순위' }, { href: '/predictions', label: '승부 예측' }, { href: '/players', label: '선수' }]
   return <>
     <header className="header"><Link className="logo" href="/">FOOTBALL DATA</Link><nav aria-label="주 메뉴" className={styles.nav}>
       {links.map((link) => <Link key={link.href} href={link.href} className={active === link.href ? 'active' : undefined} aria-current={active === link.href ? 'page' : undefined}>{link.label}</Link>)}
-      <a href="#">선수</a><a href="#">본전 뽑았나?</a><a href="#">라부 예측</a>
+      <a href="#">본전 뽑았나?</a><a href="#">라부 예측</a>
       {user ? <div className={styles.account}><span>{user.username}님</span><button disabled={busy} onClick={logout}>로그아웃</button></div> : <button className={styles.login} disabled={!ready || busy} onClick={open}>로그인</button>}
     </nav></header>
     <span className={styles.srOnly} role="status">{notice}</span>

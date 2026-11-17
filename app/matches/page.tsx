@@ -58,6 +58,7 @@ type ApiResponse = {
   mode: string
   date: string
   timezone: string
+  availableDates: string[]
   totalMatches: number
   leagues: League[]
 }
@@ -95,37 +96,6 @@ function getTodayKorea() {
 /*
   =========================
   날짜 이동
-  =========================
-*/
-
-function moveDate(dateString: string, amount: number) {
-  const [year, month, day] = dateString.split('-').map(Number)
-
-  const date = new Date(Date.UTC(year, month - 1, day))
-
-  date.setUTCDate(date.getUTCDate() + amount)
-
-  return date.toISOString().slice(0, 10)
-}
-
-/*
-  =========================
-  5일 날짜 생성
-
-  선택 날짜 기준
-  -2 / -1 / 선택 / +1 / +2
-  =========================
-*/
-
-function getFiveDates(selectedDate: string) {
-  return [-2, -1, 0, 1, 2].map((offset) => {
-    return moveDate(selectedDate, offset)
-  })
-}
-
-/*
-  =========================
-  날짜 숫자
   =========================
 */
 
@@ -242,9 +212,14 @@ export default function MatchesPage() {
     화면에 표시할 5일
   */
 
+  const availableDates = data?.availableDates ?? []
+  const selectedIndex = availableDates.indexOf(selectedDate)
   const fiveDates = useMemo(() => {
-    return getFiveDates(selectedDate)
-  }, [selectedDate])
+    const dates = data?.availableDates ?? []
+    const index = dates.indexOf(selectedDate)
+    const start = Math.max(0, Math.min(index - 2, dates.length - 5))
+    return dates.slice(start, start + 5)
+  }, [data, selectedDate])
 
   /*
     =========================
@@ -252,13 +227,14 @@ export default function MatchesPage() {
     =========================
   */
 
-  const loadMatches = useCallback(async () => {
+  const loadMatches = useCallback(async (signal: AbortSignal) => {
     try {
       setLoading(true)
       setError('')
 
       const response = await fetch(
-        `/api/matches?league=${selectedLeague}&date=${selectedDate}`,
+        `/api/matches?league=${selectedLeague}&date=${selectedDate}&matchDatesOnly=true`,
+        { signal },
       )
 
       const result = await response.json()
@@ -268,23 +244,29 @@ export default function MatchesPage() {
       }
 
       setData(result)
+      setSelectedDate(result.date)
     } catch (error) {
+      if (signal.aborted) return
       if (error instanceof Error) {
         setError(error.message)
       } else {
         setError('경기 데이터를 불러오지 못했습니다.')
       }
     } finally {
-      setLoading(false)
+      if (!signal.aborted) setLoading(false)
     }
   }, [selectedLeague, selectedDate])
 
   useEffect(() => {
+    const controller = new AbortController()
     const timer = setTimeout(() => {
-      loadMatches()
+      loadMatches(controller.signal)
     }, 0)
 
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
   }, [loadMatches])
 
   /*
@@ -306,11 +288,13 @@ export default function MatchesPage() {
   */
 
   const previousDay = () => {
-    setSelectedDate((current) => moveDate(current, -1))
+    if (selectedIndex > 0) setSelectedDate(availableDates[selectedIndex - 1])
   }
 
   const nextDay = () => {
-    setSelectedDate((current) => moveDate(current, 1))
+    if (selectedIndex >= 0 && selectedIndex < availableDates.length - 1) {
+      setSelectedDate(availableDates[selectedIndex + 1])
+    }
   }
 
   const goToday = () => {
@@ -587,6 +571,12 @@ export default function MatchesPage() {
           cursor: pointer;
 
           transition: 0.2s;
+        }
+
+        .date-arrow:disabled,
+        .date-card:disabled {
+          opacity: 0.45;
+          cursor: default;
         }
 
         .date-arrow:hover {
@@ -1405,6 +1395,7 @@ export default function MatchesPage() {
 
                 <button
                   className="date-arrow"
+                  disabled={loading || selectedIndex <= 0}
                   onClick={previousDay}
                   aria-label="이전 날짜"
                 >
@@ -1420,6 +1411,7 @@ export default function MatchesPage() {
                       className={
                         date === selectedDate ? 'date-card active' : 'date-card'
                       }
+                      disabled={loading}
                       onClick={() => setSelectedDate(date)}
                     >
                       {isToday(date) && <span className="today-dot" />}
@@ -1443,6 +1435,7 @@ export default function MatchesPage() {
 
                 <button
                   className="date-arrow"
+                  disabled={loading || selectedIndex < 0 || selectedIndex >= availableDates.length - 1}
                   onClick={nextDay}
                   aria-label="다음 날짜"
                 >
@@ -1473,9 +1466,10 @@ export default function MatchesPage() {
                       <div className="calendar-popup">
                         <div className="calendar-title">날짜 선택</div>
 
-                        <input
+                        <select
                           className="calendar-input"
-                          type="date"
+                          aria-label="??? ?? ?? ??"
+                          disabled={loading || availableDates.length === 0}
                           value={selectedDate}
                           onChange={(event) => {
                             if (!event.target.value) {
@@ -1485,7 +1479,14 @@ export default function MatchesPage() {
                             setSelectedDate(event.target.value)
                             setCalendarOpen(false)
                           }}
-                        />
+                        >
+                          {availableDates.length === 0 && <option value="">?? ?? ??</option>}
+                          {availableDates.map((date) => (
+                            <option key={date} value={date}>
+                              {date} ({getWeekday(date)})
+                            </option>
+                          ))}
+                        </select>
 
                         <button className="calendar-today" onClick={goToday}>
                           오늘로 이동

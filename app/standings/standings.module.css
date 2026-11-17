@@ -126,7 +126,28 @@
 .forecastMatch > div { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
 .forecastMatch span, .forecastMatch time { color: #72829b; font-size: 11px; }
 .forecastMatch strong { font-size: 20px; overflow-wrap: anywhere; }
-.forecastScore b { font-size: 38px; letter-spacing: 3px; color: #2563eb; }
+.forecastTeam { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; }
+.forecastTeam img { flex-shrink: 0; object-fit: contain; }
+.forecastTeam strong { min-width: 0; }
+@media (max-width: 550px) {
+  .forecastTeam { gap: 7px; }
+  .forecastTeam img { width: 28px; height: 28px; }
+}
+.recentForm { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.recentForm > small { color: #72829b; font-size: 10px; }
+.recentForm > button { border: 0; background: transparent; color: #2563eb; font-size: 11px; cursor: pointer; text-decoration: underline; }
+.formBoxes { display: grid; grid-template-columns: repeat(5, 38px); gap: 5px; list-style: none; padding: 0; margin: 0; }
+.formBoxes li { aspect-ratio: 1; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.formBoxes b { font-size: 13px; }
+.formBoxes small { font-size: 9px; }
+.formWin { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.formDraw { background: #edf1f6; color: #52617a; border: 1px solid #dce3ec; }
+.formLoss { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.formEmpty { background: #f6f8fb; color: #8b99ad; border: 1px dashed #dce3ec; }
+@media (max-width: 700px) {
+  .forecastMatch { grid-template-columns: 1fr 1fr; }
+  .forecastForm { grid-column: 1 / -1; grid-row: 2; }
+}
 .forecastSummary { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 14px 0; }
 .forecastSummary strong { color: #2563eb; font-size: 16px; }
 .forecastSummary span { color: #72829b; font-size: 11px; }
@@ -141,7 +162,7 @@
 .method { border-top: 1px solid #edf1f6; padding-top: 15px; font-size: 12px; color: #72829b; line-height: 1.8; }
 .method summary { cursor: pointer; color: #516a8f; }
 .method p { margin-top: 9px; }
-@media (max-width: 550px) { .prediction { padding: 20px 15px; } .forecastMatch { gap: 8px; } .forecastMatch strong { font-size: 14px; } .forecastScore b { font-size: 28px; } .forecastSummary { align-items: flex-start; flex-direction: column; } .probabilityLabels { font-size: 10px; } }
+@media (max-width: 550px) { .prediction { padding: 20px 15px; } .forecastMatch { gap: 8px; } .forecastMatch strong { font-size: 14px; } .forecastSummary { align-items: flex-start; flex-direction: column; } .probabilityLabels { font-size: 10px; } }
 .raceHeader { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 12px 0 20px; }
 .raceHeader h2 { font-size: 22px; letter-spacing: -.7px; }
 .raceHeader label { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #64748b; }

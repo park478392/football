@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
               return false
             }
 
-            return getKoreanDate(match.utcDate) === selectedDate
+            return Number.isFinite(Date.parse(match.utcDate))
           })
 
           /*
@@ -294,7 +294,26 @@ export async function GET(request: NextRequest) {
       프론트에서 필요하면
       matches.length === 0인 리그를 숨기면 됨.
     */
-    const totalMatches = results.reduce(
+    const availableDates: string[] = Array.from(
+      new Set<string>(results.flatMap((league) =>
+        league.matches.map((match: { koreanDate: string }) => match.koreanDate),
+      )),
+    ).sort()
+
+    const resolvedDate = searchParams.get('matchDatesOnly') === 'true'
+      ? availableDates.find((date) => date >= selectedDate)
+        ?? availableDates.at(-1)
+        ?? selectedDate
+      : selectedDate
+
+    const leagues = results.map((league) => ({
+      ...league,
+      matches: league.matches.filter(
+        (match: { koreanDate: string }) => match.koreanDate === resolvedDate,
+      ),
+    }))
+
+    const totalMatches = leagues.reduce(
       (total, league) => total + league.matches.length,
       0,
     )
@@ -302,13 +321,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       mode: selectedLeague === 'ALL' ? 'ALL' : 'SINGLE',
 
-      date: selectedDate,
+      date: resolvedDate,
 
       timezone: 'Asia/Seoul',
 
       totalMatches,
 
-      leagues: results,
+      availableDates,
+
+      leagues,
     })
   } catch (error) {
     console.error('경기 API 서버 오류:', error)
