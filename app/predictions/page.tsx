@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react'
 import PredictionBoard from './PredictionBoard'
 import DailyAttendance from './DailyAttendance'
 import styles from '../standings/standings.module.css'
+import PointShop from '../standings/PointShop'
+import { useAccount } from '../AccountProvider'
 
 const leagues = [
   { code: 'PL', name: '프리미어리그' }, { code: 'PD', name: '라리가' },
@@ -15,12 +17,14 @@ type Row = { position: number; team: { id: number; name: string; shortName: stri
 type Data = { standings: { type: string; table: Row[] }[] }
 
 export default function PredictionsPage() {
+  const { user, loading: accountLoading, error: accountError, openAuth, refresh } = useAccount()
   const [league, setLeague] = useState('PL')
   const [data, setData] = useState<Data | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
   useEffect(() => {
+    if (!user) return
     const controller = new AbortController()
     async function load() {
       setLoading(true); setError(''); setData(null)
@@ -35,17 +39,23 @@ export default function PredictionsPage() {
     }
     void load()
     return () => controller.abort()
-  }, [league, attempt])
+  }, [league, attempt, user])
   const table = data?.standings.find((item) => item.type === 'TOTAL')?.table ?? []
   return <div className="site">
     <SiteHeader active="/predictions" />
     <main className={styles.main}><div className={styles.hero}><span className="section-label">PICK YOUR WINNER</span><h1>승부 예측</h1><p>다음 경기의 승·무·패를 예측하고 가상 포인트로 도전해 보세요.</p></div>
+      {accountLoading ? <div className={styles.state} role="status">로그인 상태를 확인하고 있습니다.</div>
+        : !user ? <div className={styles.loginGate}><h2>로그인하고 승부 예측에 참여하세요</h2><p>예측으로 모은 포인트로 내 이름, 포인터와 칭호를 꾸밀 수 있습니다.</p><button onClick={() => openAuth('login')}>로그인</button><button onClick={() => openAuth('signup')}>회원가입</button>{accountError && <p role="alert">{accountError}<button onClick={() => { void refresh() }}>다시 확인</button></p>}</div>
+        : <>
       <DailyAttendance />
+      {accountError && <p className={styles.gameMessage} role="alert">{accountError}<button className={styles.resultButton} onClick={() => { void refresh() }}>다시 시도</button></p>}
       <div className={styles.tabs} aria-label="리그 선택">{leagues.map((item) => <button key={item.code} aria-pressed={league === item.code} className={league === item.code ? styles.selected : ''} onClick={() => setLeague(item.code)}>{item.name}</button>)}</div>
       {loading ? <div className={styles.state} role="status"><div className="loader" /><p>경기 예측을 준비하고 있습니다.</p></div>
         : error ? <div className={styles.state} role="alert"><strong>예측 정보를 불러올 수 없습니다</strong><p>{error}</p><button onClick={() => setAttempt((value) => value + 1)}>다시 시도</button></div>
         : !table.length ? <div className={styles.state}><p>아직 시즌 기록이 없습니다.</p></div>
         : <PredictionBoard key={league} league={league} table={table} homeTable={data?.standings.find((item) => item.type === 'HOME')?.table ?? []} awayTable={data?.standings.find((item) => item.type === 'AWAY')?.table ?? []} />}
+      <PointShop />
+      </>}
       <p className={styles.source}>가상 포인트 전용 · 데이터 제공: football-data.org</p>
     </main>
   </div>

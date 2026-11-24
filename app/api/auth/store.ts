@@ -3,10 +3,19 @@ import { randomBytes, scrypt as scryptCallback, createHash, timingSafeEqual } fr
 import { promisify } from 'node:util'
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises'
 import path from 'node:path'
+import { hasMongoConfiguration, mongoStorage } from './mongo'
 
 const scrypt = promisify(scryptCallback)
-type Account = { id: string; username: string; salt: string; hash: string }
-type Session = { tokenHash: string; userId: string; expires: number }
+export type AccountUser = { id: string; username: string; role?: 'admin' }
+export type Account = AccountUser & { salt: string; hash: string }
+export type Session = { tokenHash: string; userId: string; expires: number }
+export type AuthStorage = {
+  findAccount(username: string): Promise<Account | null>
+  createAccount(account: Account): Promise<void>
+  createSession(session: Session): Promise<void>
+  sessionUser(tokenHash: string): Promise<AccountUser | null>
+  revoke(tokenHash: string): Promise<void>
+}
 type Database = { users: Account[]; sessions: Session[] }
 const globalStore = globalThis as typeof globalThis & { authQueue?: Promise<unknown> }
 const digest = (token: string) => createHash('sha256').update(token).digest('hex')
@@ -37,35 +46,47 @@ async function database<T>(work: (db: Database) => Promise<T> | T): Promise<T> {
   return queued
 }
 
+const fileStorage: AuthStorage = {
+  findAccount: (username) => database((db) => db.users.find((user) => user.username === username) ?? null),
+  createAccount: (account) => database((db) => {
+    if (db.users.some((user) => user.username === account.username)) throw new Error('이미 사용 중인 아이디입니다.')
+    db.users.push(account)
+  }),
+  createSession: (session) => database((db) => { db.sessions.push(session) }),
+  sessionUser: (tokenHash) => database((db) => {
+    const session = db.sessions.find((item) => item.tokenHash === tokenHash)
+    const user = db.users.find((item) => item.id === session?.userId)
+    return user ? { id: user.id, username: user.username, role: user.role } : null
+  }),
+  revoke: (tokenHash) => database((db) => { db.sessions = db.sessions.filter((item) => item.tokenHash !== tokenHash) }),
+}
+
 export async function authenticate(username: string, password: string, signup: boolean) {
-  return database(async (db) => {
-    let account = db.users.find((user) => user.username === username)
-    if (signup) {
-      if (account) throw new Error('이미 사용 중인 아이디입니다.')
-      const salt = randomBytes(16).toString('hex')
-      const hash = (await scrypt(password, salt, 64) as Buffer).toString('hex')
-      account = { id: randomBytes(16).toString('hex'), username, salt, hash }
-      db.users.push(account)
-    } else {
-      const hash = await scrypt(password, account?.salt || 'missing-account-salt', 64) as Buffer
-      if (!account || !timingSafeEqual(hash, Buffer.from(account.hash, 'hex'))) throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.')
-    }
-    const token = randomBytes(32).toString('hex')
-    db.sessions.push({ tokenHash: digest(token), userId: account.id, expires: Date.now() + SESSION_SECONDS * 1000 })
-    return { token, user: { id: account.id, username: account.username } }
-  })
+  const storage = hasMongoConfiguration() ? await mongoStorage() : fileStorage
+  let account = await storage.findAccount(username)
+  if (signup) {
+    if (account) throw new Error('이미 사용 중인 아이디입니다.')
+    const salt = randomBytes(16).toString('hex')
+    const hash = (await scrypt(password, salt, 64) as Buffer).toString('hex')
+    account = { id: randomBytes(16).toString('hex'), username, salt, hash }
+    await storage.createAccount(account)
+  } else {
+    const hash = await scrypt(password, account?.salt || 'missing-account-salt', 64) as Buffer
+    if (!account || !timingSafeEqual(hash, Buffer.from(account.hash, 'hex'))) throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.')
+  }
+  const token = randomBytes(32).toString('hex')
+  await storage.createSession({ tokenHash: digest(token), userId: account.id, expires: Date.now() + SESSION_SECONDS * 1000 })
+  return { token, user: { id: account.id, username: account.username, role: account.role } }
 }
 
 export async function sessionUser(token: string | undefined) {
   if (!token || !/^[a-f0-9]{64}$/.test(token)) return null
-  return database((db) => {
-    const session = db.sessions.find((item) => item.tokenHash === digest(token))
-    const user = db.users.find((item) => item.id === session?.userId)
-    return user ? { id: user.id, username: user.username } : null
-  })
+  const storage = hasMongoConfiguration() ? await mongoStorage() : fileStorage
+  return storage.sessionUser(digest(token))
 }
 
 export async function revoke(token: string | undefined) {
   if (!token) return
-  await database((db) => { db.sessions = db.sessions.filter((item) => item.tokenHash !== digest(token)) })
+  const storage = hasMongoConfiguration() ? await mongoStorage() : fileStorage
+  await storage.revoke(digest(token))
 }

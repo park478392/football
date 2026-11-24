@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticate, sessionUser, revoke, COOKIE_NAME, SESSION_SECONDS } from './store'
+import { normalizeUsername, usernameError } from '../../username'
 
 export const runtime = 'nodejs'
 const attempts = new Map<string, { count: number; expires: number }>()
@@ -23,9 +24,11 @@ export async function POST(request: NextRequest) {
       return response
     }
     if (!['login', 'signup'].includes(body.action)) return reply({ error: '잘못된 요청입니다.' }, 400)
-    const username = typeof body.username === 'string' ? body.username.trim().toLowerCase() : ''
+    const username = typeof body.username === 'string' ? normalizeUsername(body.username) : ''
     const password = typeof body.password === 'string' ? body.password : ''
-    if (!/^[a-z0-9_]{3,20}$/.test(username) || password.length < 8 || password.length > 128) return reply({ error: '아이디는 영문·숫자·밑줄 3~20자, 비밀번호는 8~128자로 입력해 주세요.' }, 400)
+    const invalidUsername = usernameError(username, body.action === 'signup')
+    if (invalidUsername) return reply({ error: invalidUsername }, 400)
+    if (password.length < 8 || password.length > 128) return reply({ error: '비밀번호는 8~128자로 입력해 주세요.' }, 400)
     const address = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'local'
     const now = Date.now()
     for (const [key, value] of attempts) if (value.expires <= now) attempts.delete(key)

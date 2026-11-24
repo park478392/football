@@ -1,0 +1,71 @@
+.main {
+  width: min(760px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 52px 0 72px;
+}
+
+.main h1 {
+  margin-bottom: 22px;
+  color: #142742;
+  font-size: clamp(26px, 5vw, 38px);
+  letter-spacing: -.04em;
+}
+
+.identity, .settings, .state {
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #102441;
+  color: #e2edff;
+}
+
+.identity > span:first-child { font-size: 21px; }
+.identity > span:last-child { font-size: 13px; }
+.identity strong { margin-inline-start: 6px; color: white; }
+
+.settings, .state {
+  margin-top: 16px;
+  border: 1px solid #dee7f2;
+  background: white;
+  color: #243349;
+}
+
+.settings h2 { font-size: 20px; }
+.current {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 20px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #eff5fc;
+}
+
+.current img { object-fit: contain; }
+.current small { display: block; margin-top: 3px; color: #506582; }
+.form { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.league, .form label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; }
+.form label { flex: 1 1 230px; min-width: 0; }
+.main select, .main button { min-height: 42px; border-radius: 8px; font: inherit; }
+.main select { width: 100%; padding: 8px 11px; border: 1px solid #c6d4e6; background: white; color: #243349; }
+.main button { padding: 8px 14px; border: 1px solid transparent; background: #2563eb; color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
+.main button.secondary { border-color: #c6d4e6; background: white; color: #344967; }
+.main button:disabled { opacity: .55; cursor: default; }
+.main :is(button, select):focus-visible { outline: 3px solid #7aabff; outline-offset: 2px; }
+.state button { margin-top: 12px; }
+.error, .notice { margin-top: 12px; font-size: 13px; }
+.error { color: #a32939; }
+.notice { color: #146840; }
+
+@media (max-width: 520px) {
+  .main { padding-top: 30px; }
+  .identity, .settings, .state { padding: 16px; }
+  .form label { flex-basis: 100%; }
+}

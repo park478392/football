@@ -137,7 +137,7 @@ export default function PredictionBoard({ league, table, homeTable, awayTable }:
         <div className={styles.forecastSummary}><strong>{name(current)} 승리 가능성 {prediction.percentages[myHome ? 0 : 2]}%</strong><span>{myHome ? '홈' : '원정'} 경기 · 시즌 기록 기반 추정</span></div>
         <div className={styles.probabilityBar} aria-hidden="true">{prediction.percentages.map((value, i) => <span key={i} style={{ width: `${value}%` }} />)}</div>
         <div className={styles.probabilityLabels}><span>{name(home)} 승 <b>{prediction.percentages[0]}%</b></span><span>무승부 <b>{prediction.percentages[1]}%</b></span><span>{name(away)} 승 <b>{prediction.percentages[2]}%</b></span></div>
-        <MyPrediction key={`${nextMatch.id}-${teamId}`} matchId={nextMatch.id} teamName={name(current)} isHome={myHome} kickoff={nextMatch.utcDate} league={league} matchTitle={`${name(home)} vs ${name(away)}`} probabilities={prediction.percentages} />
+        <MyPrediction key={`${nextMatch.id}-${teamId}`} matchId={nextMatch.id} teamId={current.team.id} teamName={name(current)} isHome={myHome} kickoff={nextMatch.utcDate} league={league} probabilities={prediction.percentages} />
         <details className={styles.method}><summary>예측 근거 보기</summary><p>{prediction.venue ? '홈 팀의 홈 성적과 원정 팀의 원정 성적' : '홈·원정 기록이 없는 팀은 시즌 전체 성적'}의 경기당 득점·실점을 사용합니다. 리그 평균 5경기분을 더해 적은 표본의 영향을 줄인 뒤, 포아송 모형으로 스코어별 확률을 계산합니다.</p><p>모형 예상 득점: {name(home)} {prediction.homeMean.toFixed(2)} · {name(away)} {prediction.awayMean.toFixed(2)}. 두 팀 중 적은 시즌 표본: {prediction.sample}경기.</p><p>부상·선발·최근 이적은 반영하지 않으며, 정확도를 검증한 예측 모델은 아닙니다.</p></details>
       </>}
     </section>

@@ -25,6 +25,7 @@ type PlayerRecord = {
     section?: string | null
     position: string | null
     shirtNumber: number | null
+    photo: string | null
   }
   team: { id: number; name: string; shortName: string; crest: string | null }
   playedMatches: number | null
@@ -89,13 +90,14 @@ function age(dateOfBirth: string | null) {
   return `${today.getUTCFullYear() - birth.getUTCFullYear() - Number(beforeBirthday)}세`
 }
 
-function Portrait({ id, name, large = false }: { id: number; name: string; large?: boolean }) {
-  const [failed, setFailed] = useState(false)
-  const source = playerPhotos[id]?.image
+function Portrait({ player, large = false }: { player: PlayerRecord['player']; large?: boolean }) {
+  const [failedSources, setFailedSources] = useState<string[]>([])
+  const { id, name, photo } = player
+  const source = [photo, playerPhotos[id]?.image].find((url) => url && !failedSources.includes(url))
   return (
     <div className={large ? styles.portrait : styles.avatar}>
-      {source && !failed
-        ? <img src={source} alt={large ? name : ''} loading={large ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(true)} />
+      {source
+        ? <Image src={source} alt={large ? name : ''} width={320} height={400} unoptimized loading={large ? 'eager' : 'lazy'} onError={() => setFailedSources((failed) => [...failed, source])} />
         : <span aria-label={`${name} 사진 없음`}>{name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span>}
     </div>
   )
@@ -124,14 +126,14 @@ function PlayerDetails({ record, season, leagueName }: {
             <span>{team.shortName || team.name}</span>
           </div>
           <h2 id="player-name">{player.name}</h2>
-          <p className={styles.position}>{positionName(player)}{player.shirtNumber != null && ` · #${player.shirtNumber}`}</p>
+          <p className={styles.position}>{positionName(player)}{player.shirtNumber != null && ` · ${player.shirtNumber}`}</p>
           <dl className={styles.bio}>
             <div><dt>국적</dt><dd>{player.nationality || '미제공'}</dd></div>
             <div><dt>나이</dt><dd>{age(player.dateOfBirth)}</dd></div>
             <div><dt>생년월일</dt><dd>{player.dateOfBirth || '미제공'}</dd></div>
           </dl>
         </div>
-        <Portrait key={player.id} id={player.id} name={player.name} large />
+        <Portrait key={player.id} player={player} large />
         <div className={styles.profileFooter}><span>{leagueName} · {season}</span><strong>{goalRank == null ? '득점 순위 미제공' : `득점 ${goalRank}위`}</strong></div>
       </section>
 
@@ -237,16 +239,16 @@ function LeaguePlayers({ league }: { league: typeof leagues[number] }) {
         <p className={styles.rosterNote}>{selectedTeam === 'ALL' ? `리그 등록 선수 ${records.length}명` : `선택한 팀의 등록 선수 ${teamRecords.length}명`} · 포지션순</p>
         <div className={styles.playerList}>
           {filtered.map((record) => <button key={record.player.id} className={selected?.player.id === record.player.id ? styles.activePlayer : styles.playerButton} aria-pressed={selected?.player.id === record.player.id} onClick={() => setSelectedId(record.player.id)}>
-            <Portrait id={record.player.id} name={record.player.name} />
+            <Portrait player={record.player} />
             <span className={styles.playerName}><strong>{record.player.name}</strong><small>{selectedClub ? positionName(record.player) : record.team.shortName || record.team.name}</small></span>
-            <span className={styles.goals}>{record.goals == null ? <small>{selectedClub ? '—' : positionName(record.player)}</small> : <>{record.goals}<small>골</small></>}</span>
+            <span className={styles.shirtNumber}>{record.player.shirtNumber ?? '—'}<small>등번호</small></span>
           </button>)}
           {!filtered.length && <p className={styles.noResults}>검색 결과가 없습니다.<br />선수의 영문 이름이나 팀 이름으로 검색해 주세요.</p>}
         </div>
       </aside>
       {selected ? <PlayerDetails record={selected} season={season} leagueName={league.name} /> : <div className={styles.state}>선택한 팀에 조회되는 선수가 없습니다. 팀 선택이나 검색어를 변경해 주세요.</div>}
     </div>
-    <p className={styles.source}>데이터 제공 <a href="https://www.football-data.org/" target="_blank" rel="noreferrer">football-data.org</a> · {league.name} {season} · 팀별 등록 선수단 기준<br />{data?.statsAvailable ? '시즌 기록은 API 제공 선수에 한해 표시됩니다.' : '시즌 기록을 불러오지 못했습니다. 선수 프로필을 먼저 표시합니다.'}</p>
+    <p className={styles.source}>데이터 제공 <a href="https://www.football-data.org/" target="_blank" rel="noreferrer">football-data.org</a> · {league.name} {season} · 팀별 등록 선수단 기준<br />등번호·사진 <a href="https://www.espn.com/soccer/" target="_blank" rel="noreferrer">ESPN</a> · <a href="https://www.api-football.com/" target="_blank" rel="noreferrer">API-Football</a>{league.code === 'PL' && <> · <a href="https://fantasy.premierleague.com/" target="_blank" rel="noreferrer">Fantasy Premier League</a></>}<br />{data?.statsAvailable ? '시즌 기록은 API 제공 선수에 한해 표시됩니다.' : '시즌 기록을 불러오지 못했습니다. 선수 프로필을 먼저 표시합니다.'}</p>
   </>
 }
 

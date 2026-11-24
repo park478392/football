@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import rosterSnapshot from './roster-snapshot.json'
+
+type RosterDetails = { shirtNumber?: number; photo?: string }
+const rosterTeams: Partial<Record<string, Record<string, RosterDetails>>> = rosterSnapshot.teams
 
 type Player = {
   id: number
@@ -56,16 +60,19 @@ export async function GET(request: NextRequest) {
     }
     const stats = new Map(scorers.map((scorer) => [`${scorer.team.id}-${scorer.player.id}`, scorer]))
     const teams: Team[] = teamData.teams || []
+    const currentRosters = teamData.season?.startDate?.slice(0, 4) === rosterSnapshot.season
     const players = teams.flatMap((team) => (team.squad || []).map((player) => {
       const scorer = stats.get(`${team.id}-${player.id}`)
       const goals = scorer?.goals ?? null
+      const roster = currentRosters ? rosterTeams[team.id]?.[player.id] : undefined
       return {
         player: {
           ...player,
           dateOfBirth: player.dateOfBirth ?? null,
           nationality: player.nationality ?? null,
           position: player.position ?? null,
-          shirtNumber: player.shirtNumber ?? null,
+          shirtNumber: player.shirtNumber ?? roster?.shirtNumber ?? null,
+          photo: roster?.photo ?? null,
         },
         team: { id: team.id, name: team.name, shortName: team.shortName, crest: team.crest },
         playedMatches: scorer?.playedMatches ?? null,

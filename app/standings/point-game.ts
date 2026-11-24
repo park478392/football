@@ -1,17 +1,10 @@
+import type { FavoriteTeam } from '../profile/teams'
+
 export type Outcome = 'HOME' | 'DRAW' | 'AWAY'
 export type Pick = { matchId: number; league: string; title: string; kickoff: string; outcome: Outcome; stake: number; status: 'PENDING' | 'WON' | 'LOST' | 'VOID'; reward: number; probability?: number; multiplier?: number; actualOutcome?: Outcome; finalScore?: string; isHome?: boolean; teamName?: string }
-export type Wallet = { balance: number; picks: Pick[]; inventory?: string[]; equipped?: Partial<Record<'title' | 'frame' | 'theme', string>>; lastAttendance?: string; credits?: string[] }
+export type Wallet = { balance: number; picks: Pick[]; inventory?: string[]; equipped?: Partial<Record<'title' | 'frame' | 'theme' | 'name' | 'cursor', string>>; lastAttendance?: string; favoriteTeam?: FavoriteTeam | null; revision?: number }
 export type MatchResult = { id: number; status: string; winner: string | null; home: number | null; away: number | null }
-export const initialWallet = (): Wallet => ({ balance: 1000, picks: [], credits: ['owner-test-refund-2026-11-03'] })
-export const STORAGE_KEY = 'football-points-v1'
-
-// One-time restoration requested by the owner after spending points in local testing.
-export function restoreTestPoints(wallet: Wallet): Wallet {
-  const credit = 'owner-test-refund-2026-11-03'
-  if (wallet.credits?.includes(credit)) return wallet
-  return { ...wallet, balance: wallet.balance + 1000, credits: [...(wallet.credits ?? []), credit] }
-}
-
+export const initialWallet = (): Wallet => ({ balance: 1000, picks: [], inventory: [], equipped: {} })
 export function koreaDate(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now)
 }
@@ -20,11 +13,6 @@ export function claimAttendance(wallet: Wallet, now = new Date()): Wallet {
   const today = koreaDate(now)
   if (wallet.lastAttendance && wallet.lastAttendance >= today) throw new Error('오늘 출석 보상을 이미 받았습니다.')
   return { ...wallet, balance: wallet.balance + 100, lastAttendance: today }
-}
-
-export function saveWallet(wallet: Wallet) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(wallet))
-  window.dispatchEvent(new Event('football-wallet-change'))
 }
 
 export function rewardMultiplier(probability: number) {
@@ -67,21 +55,4 @@ export function settle(wallet: Wallet, results: MatchResult[]): Wallet {
     return { ...pick, status: won ? 'WON' : 'LOST', reward, actualOutcome: outcome, finalScore: `${match.home} : ${match.away}` }
   })
   return { ...wallet, balance, picks }
-}
-
-export function readWallet(): Wallet {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return initialWallet()
-  const value = JSON.parse(raw)
-  if (value.credits !== undefined && (!Array.isArray(value.credits) || value.credits.some((credit: unknown) => typeof credit !== 'string'))) throw new Error('포인트 지급 기록을 읽을 수 없습니다.')
-  if (value.lastAttendance !== undefined && (typeof value.lastAttendance !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.lastAttendance))) throw new Error('출석 기록을 읽을 수 없습니다.')
-  if ((value.inventory !== undefined && (!Array.isArray(value.inventory) || value.inventory.some((id: unknown) => typeof id !== 'string'))) || (value.equipped !== undefined && (value.equipped === null || typeof value.equipped !== 'object' || Object.values(value.equipped).some((id) => typeof id !== 'string')))) throw new Error('저장된 아이템 기록을 읽을 수 없습니다.')
-  if (!Number.isSafeInteger(value.balance) || value.balance < 0 || !Array.isArray(value.picks) || value.picks.some((pick: Pick) =>
-    !Number.isInteger(pick.matchId) || !['PL', 'PD', 'BL1', 'SA', 'FL1'].includes(pick.league) || typeof pick.title !== 'string' || !Number.isFinite(Date.parse(pick.kickoff)) || !['HOME', 'DRAW', 'AWAY'].includes(pick.outcome) || !['PENDING', 'WON', 'LOST', 'VOID'].includes(pick.status) || !Number.isInteger(pick.stake) || pick.stake < 10 || pick.stake > 500 || !Number.isInteger(pick.reward) || pick.reward < 0 || (pick.multiplier !== undefined && (!Number.isFinite(pick.multiplier) || pick.multiplier < 1 || pick.multiplier > 20)) || (pick.probability !== undefined && (!Number.isFinite(pick.probability) || pick.probability < 0 || pick.probability > 100)))) throw new Error('저장된 포인트 기록을 읽을 수 없습니다.')
-  if (process.env.NODE_ENV === 'development') {
-    const restored = restoreTestPoints(value)
-    if (restored !== value) localStorage.setItem(STORAGE_KEY, JSON.stringify(restored))
-    return restored
-  }
-  return value
 }
